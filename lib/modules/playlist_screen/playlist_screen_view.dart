@@ -35,9 +35,12 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Playlists"),
+        title: const Text("My Playlists", style: TextStyle(fontWeight: FontWeight.bold),),
       ),
-      body: SafeArea(child: _buildContent(context)),
+      body: SafeArea(
+        bottom: false,
+        child: _buildContent(context),
+      ),
     );
   }
 
@@ -83,15 +86,23 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                 height: 40,
                               ),
                             ),
-                            title: Text(album.name ?? ""),
+                            title: Text(album.name ?? "", style: TextStyle(fontWeight: FontWeight.w600),),
                             subtitle: Text(album.artistName ?? ""),
-                            trailing: IconButton(
-                              onPressed: () async {
-                                await _controller.playAlbum(album.id);
-                              },
-                              icon: Icon(CupertinoIcons.play_circle),
-                            ),
+                            trailing: Obx(() {
+                              if (_controller.isPlaying && album.id == _controller.albumDetail?.id) {
+                                return Lottie.asset(
+                                    "assets/lotties/playing_wave.json",
+                                    fit: BoxFit.contain
+                                );
+                              } else {
+                                return const SizedBox();
+                              }
+                            }),
                             onTap: () async {
+                              if (_controller.albumDetail?.id != album.id) {
+                                await _player.stop();
+                              }
+
                               await _controller.playAlbum(album.id);
                             },
                           );
@@ -128,23 +139,17 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   height: MediaQuery.of(context).size.height * 0.3,
                   color: Colors.white,
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0, bottom: 32.0),
                     child: Row(
                       children: [
                         Expanded(
                           flex: 2,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: CachedNetworkImage(
-                                    imageUrl: albumDetail.image ?? "",
-                                  ),
-                                ),
-                                Divider(),
-                                Text(albumDetail.name ?? "")
-                              ],
+                          child: FittedBox(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: CachedNetworkImage(
+                                imageUrl: albumDetail.image ?? "",
+                              ),
                             ),
                           ),
                         ),
@@ -153,6 +158,28 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                           flex: 3,
                           child: Column(
                             children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Expanded(
+                                      child: Text(
+                                        "Playlist : ${albumDetail.name ?? ""}",
+                                        overflow: TextOverflow.fade,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500
+                                        ),
+                                      ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () async {
+                                      _controller.stopMusic();
+                                      await _player.stop();
+                                    },
+                                    icon: Icon(CupertinoIcons.xmark),
+                                  ),
+
+                                ],
+                              ),
                               Expanded(
                                 child: ListView.builder(
                                   shrinkWrap: true,
@@ -199,34 +226,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                         ),
                       ],
                     ),
-                    // child: Column(
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //   children: [
-                    //     Row(
-                    //       children: [
-                    //         Expanded(child: Text("Playing ${albumDetail?.name ?? "-"}")),
-                    //         IconButton(onPressed: () {
-                    //           _controller.stopMusic();
-                    //         },
-                    //           icon: Icon(CupertinoIcons.xmark),
-                    //         )
-                    //       ],
-                    //     ),
-                    //     Row(
-                    //       children: [
-                    //         IconButton(
-                    //             onPressed: () async {
-                    //               final duration = await _player.setUrl(           // Load a URL
-                    //                   albumDetail?.tracks?.first.audio ?? "");
-                    //               print(duration);
-                    //               await _player.play();
-                    //             },
-                    //             icon: Icon(Icons.add),
-                    //         )
-                    //       ],
-                    //     ),
-                    //   ],
-                    // ),
                   ),
                 );
               } else {
