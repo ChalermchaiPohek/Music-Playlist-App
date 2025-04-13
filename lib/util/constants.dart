@@ -5,7 +5,7 @@ abstract class AppConst {
   static String baseUrl = "https://api.jamendo.com/v3.0/";
 
   static String getAlbumUrl = "$baseUrl/albums/?client_id=$clientId&limit=20";
-  static String getAlbumTrackUrl = "$baseUrl/albums/tracks/?client_id=$clientId"; // Pass id from getAlbum
+  static String getAlbumTrackUrl = "$baseUrl/albums/tracks/?client_id=$clientId";
 }
 
 abstract class UIConst {

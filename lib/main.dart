@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
       getPages: Routes.routers,
       // title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       // home: const CartScreen(),

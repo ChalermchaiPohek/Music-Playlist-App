@@ -38,7 +38,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
         title: const Text("My Playlists", style: TextStyle(fontWeight: FontWeight.bold),),
       ),
       body: SafeArea(
-        bottom: false,
         child: _buildContent(context),
       ),
     );
@@ -111,16 +110,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                     ),
                     Obx(() {
                       if (_controller.isFetchNextData) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              CupertinoActivityIndicator()
-                            ],
-                          ),
-                        );
+                        return Center(child: CupertinoActivityIndicator());
                       } else {
                         return const SizedBox();
                       }
@@ -139,7 +129,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                   height: MediaQuery.of(context).size.height * 0.3,
                   color: Colors.white,
                   child: Padding(
-                    padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0, bottom: 32.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: Row(
                       children: [
                         Expanded(
@@ -168,6 +158,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.w500
                                         ),
+                                        maxLines: 2,
                                       ),
                                   ),
                                   IconButton(
