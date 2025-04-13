@@ -7,13 +7,9 @@ import 'package:music_playlist_app/services/music/services.dart';
 class PlaylistScreenController extends GetxController {
   final MusicService _musicService = Get.find();
 
-  // final Rxn<Album> _album = Rxn();
-  // Album? get fetchAlbum => _album.value;
   late final RxList<AlbumData> _albumList = RxList<AlbumData>();
   List<AlbumData> get fetchAlbum => _albumList;
 
-  // late RxList<AlbumTrackData> _trackList = RxList<AlbumTrackData>();
-  // List<AlbumTrackData> get tracks => _trackList;
   late final Rxn<AlbumTrackData> _albumDetail = Rxn<AlbumTrackData>();
   AlbumTrackData? get albumDetail => _albumDetail.value;
 
@@ -23,11 +19,14 @@ class PlaylistScreenController extends GetxController {
   final _isFetchNextData = false.obs;
   bool get isFetchNextData => _isFetchNextData.value;
 
-  final _isPlaying = false.obs;
-  bool get isPlaying => _isPlaying.value;
+  final _isShowPlayer = false.obs;
+  bool get isShowPlayer => _isShowPlayer.value;
 
   final _playingTrackId = "".obs;
   String get playingTrackId => _playingTrackId.value;
+
+  final _isPlaying = false.obs;
+  bool get isPlaying => _isPlaying.value;
 
   String _playingAlbumId = "";
 
@@ -66,13 +65,12 @@ class PlaylistScreenController extends GetxController {
       _playingAlbumId = id;
       final tracksData = await _musicService.getAlbumTrack(id);
       _albumDetail.value = tracksData.results?.first;
-      _playingTrackId.value = _albumDetail.value?.tracks?.first.id ?? "";
-      _isPlaying.value = true;
+      _isShowPlayer.value = true;
     }
   }
 
   void stopMusic() {
-    _isPlaying.value = false;
+    _isShowPlayer.value = false;
   }
 
   String? getTrackUrl(String? trackId) {
@@ -82,5 +80,9 @@ class PlaylistScreenController extends GetxController {
 
     _playingTrackId.value = trackId;
     return _albumDetail.value?.tracks?.firstWhereOrNull((element) => element.id == trackId,)?.audio;
+  }
+
+  void triggerPlayerState(bool state) {
+    _isPlaying.value = state;
   }
 }

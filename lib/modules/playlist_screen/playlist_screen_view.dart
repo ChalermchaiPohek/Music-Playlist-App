@@ -121,7 +121,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             Obx(() {
               final albumDetail = _controller.albumDetail;
 
-              if (_controller.isPlaying && albumDetail != null) {
+              if (_controller.isShowPlayer && albumDetail != null) {
 
                 return Container(
                   // width: double.infinity,
@@ -159,32 +159,38 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                   itemCount: albumDetail.tracks?.length,
                                   itemBuilder: (context, index) {
                                     final track = albumDetail.tracks?.elementAt(index);
-                                    final playingTrackId = _controller.playingTrackId;
 
-                                    return ListTile(
-                                      dense: true,
-                                      leading: track?.id == playingTrackId
-                                          ? _player.playing
-                                          ? Icon(CupertinoIcons.pause_fill)
-                                          : Icon(CupertinoIcons.play_arrow_solid)
-                                          : const SizedBox(),
-                                      title: Text(
-                                        track?.name ?? "",
-                                        maxLines: 2,
-                                        overflow: TextOverflow.fade,
-                                      ),
-                                      onTap: () async {
-                                        final trackUrl = _controller.getTrackUrl(track?.id);
-                                        await _player.setUrl(trackUrl ?? "");
+                                    return Obx(() {
+                                      final playingTrackId = _controller.playingTrackId;
+                                      _player.playingStream.listen(_controller.triggerPlayerState);
 
-                                        if (_player.playing) {
-                                          await _player.pause();
-                                          await _player.play();
-                                        } else {
-                                          await _player.play();
-                                        }
-                                      },
-                                    );
+                                      return ListTile(
+                                        dense: true,
+                                        leading: track?.id == playingTrackId
+                                            ? _controller.isPlaying
+                                            ? Icon(CupertinoIcons.pause_fill)
+                                            : Icon(CupertinoIcons.play_arrow_solid)
+                                            : const SizedBox(),
+                                        title: Text(
+                                          track?.name ?? "",
+                                          maxLines: 2,
+                                          overflow: TextOverflow.fade,
+                                        ),
+                                        onTap: () async {
+                                          if (playingTrackId == track?.id) {
+                                            if (_player.playerState.playing) {
+                                              await _player.pause();
+                                            } else {
+                                              await _player.play();
+                                            }
+                                          } else {
+                                            final trackUrl = _controller.getTrackUrl(track?.id);
+                                            await _player.setUrl(trackUrl ?? "");
+                                            await _player.play();
+                                          }
+                                        },
+                                      );
+                                    });
                                   },
                                 ),
                               ),
