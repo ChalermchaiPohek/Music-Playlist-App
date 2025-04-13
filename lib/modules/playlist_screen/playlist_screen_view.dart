@@ -83,16 +83,16 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                 height: 40,
                               ),
                             ),
-                            title: Text("${index + 1} : ${album.name ?? ""}"),
+                            title: Text(album.name ?? ""),
                             subtitle: Text(album.artistName ?? ""),
                             trailing: IconButton(
-                              onPressed: () {
-                                _controller.playAlbum(album.id);
+                              onPressed: () async {
+                                await _controller.playAlbum(album.id);
                               },
                               icon: Icon(CupertinoIcons.play_circle),
                             ),
-                            onTap: () {
-                              _controller.playAlbum(album.id);
+                            onTap: () async {
+                              await _controller.playAlbum(album.id);
                             },
                           );
                         },
@@ -120,42 +120,107 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             ),
             Obx(() {
               final albumDetail = _controller.albumDetail;
-              if (_controller.isPlaying) {
+
+              if (_controller.isPlaying && albumDetail != null) {
 
                 return Container(
-                  width: double.infinity,
+                  // width: double.infinity,
                   height: MediaQuery.of(context).size.height * 0.3,
                   color: Colors.white,
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(child: Text("Playing ${albumDetail?.name ?? "-"}")),
-                            IconButton(onPressed: () {
-                              _controller.stopMusic();
-                            },
-                              icon: Icon(CupertinoIcons.xmark),
-                            )
-                          ],
+                        Expanded(
+                          flex: 2,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: CachedNetworkImage(
+                                    imageUrl: albumDetail.image ?? "",
+                                  ),
+                                ),
+                                Divider(),
+                                Text(albumDetail.name ?? "")
+                              ],
+                            ),
+                          ),
                         ),
-                        Row(
-                          children: [
-                            IconButton(
-                                onPressed: () async {
-                                  final duration = await _player.setUrl(           // Load a URL
-                                      albumDetail?.tracks?.first.audio ?? "");
-                                  print(duration);
-                                  await _player.play();
-                                },
-                                icon: Icon(Icons.add),
-                            )
-                          ],
+                        VerticalDivider(color: Colors.transparent,),
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: albumDetail.tracks?.length,
+                                  itemBuilder: (context, index) {
+                                    final track = albumDetail.tracks?.elementAt(index);
+                                    final playingTrackId = _controller.playingTrackId;
+
+                                    return ListTile(
+                                      dense: true,
+                                      leading: track?.id == playingTrackId
+                                          ? _player.playing
+                                          ? Icon(CupertinoIcons.pause_fill)
+                                          : Icon(CupertinoIcons.play_arrow_solid)
+                                          : const SizedBox(),
+                                      title: Text(
+                                        track?.name ?? "",
+                                        maxLines: 2,
+                                        overflow: TextOverflow.fade,
+                                      ),
+                                      onTap: () async {
+                                        final trackUrl = _controller.getTrackUrl(track?.id);
+                                        await _player.setUrl(trackUrl ?? "");
+
+                                        if (_player.playing) {
+                                          await _player.pause();
+                                          await _player.play();
+                                        } else {
+                                          await _player.play();
+                                        }
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
+                    // child: Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Row(
+                    //       children: [
+                    //         Expanded(child: Text("Playing ${albumDetail?.name ?? "-"}")),
+                    //         IconButton(onPressed: () {
+                    //           _controller.stopMusic();
+                    //         },
+                    //           icon: Icon(CupertinoIcons.xmark),
+                    //         )
+                    //       ],
+                    //     ),
+                    //     Row(
+                    //       children: [
+                    //         IconButton(
+                    //             onPressed: () async {
+                    //               final duration = await _player.setUrl(           // Load a URL
+                    //                   albumDetail?.tracks?.first.audio ?? "");
+                    //               print(duration);
+                    //               await _player.play();
+                    //             },
+                    //             icon: Icon(Icons.add),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ],
+                    // ),
                   ),
                 );
               } else {

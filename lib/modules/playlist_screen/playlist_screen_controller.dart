@@ -26,6 +26,9 @@ class PlaylistScreenController extends GetxController {
   final _isPlaying = false.obs;
   bool get isPlaying => _isPlaying.value;
 
+  final _playingTrackId = "".obs;
+  String get playingTrackId => _playingTrackId.value;
+
   String _playingAlbumId = "";
 
   @override
@@ -59,13 +62,25 @@ class PlaylistScreenController extends GetxController {
       return ;
     }
 
-    _playingAlbumId = id;
-    _isPlaying.value = true;
-    final tracksData = await _musicService.getAlbumTrack(id);
-    _albumDetail.value = tracksData.results?.first;
+    if (_playingAlbumId != id) {
+      _playingAlbumId = id;
+      final tracksData = await _musicService.getAlbumTrack(id);
+      _albumDetail.value = tracksData.results?.first;
+      _playingTrackId.value = _albumDetail.value?.tracks?.first.id ?? "";
+      _isPlaying.value = true;
+    }
   }
 
   void stopMusic() {
     _isPlaying.value = false;
+  }
+
+  String? getTrackUrl(String? trackId) {
+    if (trackId == null) {
+      return null;
+    }
+
+    _playingTrackId.value = trackId;
+    return _albumDetail.value?.tracks?.firstWhereOrNull((element) => element.id == trackId,)?.audio;
   }
 }
