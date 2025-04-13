@@ -15,10 +15,19 @@ class PlaylistScreen extends StatefulWidget {
 
 class _PlaylistScreenState extends State<PlaylistScreen> {
   final PlaylistScreenController _controller = Get.find<PlaylistScreenController>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+
+    _scrollController.addListener(() async {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 50 &&
+          !_controller.isFetchNextData) {
+        await _controller.getNextAlbum();
+      }
+    });
   }
 
   @override
@@ -38,110 +47,81 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           child: Lottie.asset("assets/lotties/music_loading.json"),
         );
       } else {
-        if (_controller.fetchAlbum == null || _controller.fetchAlbum?.results == null) {
+        if (_controller.fetchAlbum.isEmpty) {
           return Center(
-            child: Lottie.asset("assets/lotties/music_not_found.json"),
+            child: Lottie.asset(
+                "assets/lotties/music_not_found.json",
+            ),
           );
         }
 
-        final albumList = _controller.fetchAlbum!.results!;
+        final albumList = _controller.fetchAlbum;
 
         return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: albumList.length,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                final album = albumList.elementAt(index);
-                return ListTile(
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: CachedNetworkImage(
-                      imageUrl: album.image ?? "",
-                      fit: BoxFit.contain,
-                      width: 40,
-                      height: 40,
-                      placeholder: (context, url) {
-                        return ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Skeletonizer(
-                            child: SizedBox.square(
-                              dimension: 40,
-                              child: Container(),
-                            ),
-                          ),
-                        );
+          controller: _scrollController,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: albumList.length,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final album = albumList.elementAt(index);
+                    return ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: CachedNetworkImage(
+                          imageUrl: album.image ?? "",
+                          fit: BoxFit.contain,
+                          width: 40,
+                          height: 40,
+                          placeholder: (context, url) {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Skeletonizer(
+                                child: SizedBox.square(
+                                  dimension: 40,
+                                  child: Container(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      title: Text("${index + 1} : ${album.name ?? ""}"),
+                      subtitle: Text(album.artistName ?? ""),
+                      trailing: IconButton(
+                        onPressed: () {
+                          /// TODO: implement route to play/pause screen.
+                        },
+                        icon: Icon(CupertinoIcons.playpause),
+                      ),
+                      onTap: () {
+                        /// TODO: implement route to play/pause screen.
                       },
-                    ),
-                  ),
-                  title: Text(album.name ?? ""),
-                  subtitle: Text(album.artistName ?? ""),
-                  trailing: IconButton(
-                    onPressed: () {
-                      /// TODO: implement route to play/pause screen.
-                    },
-                    icon: Icon(CupertinoIcons.playpause),
-                  ),
-                  onTap: () {
-                    /// TODO: implement route to play/pause screen.
+                    );
                   },
-                );
-              },
-            ),
+                ),
+              ),
+              Obx(() {
+                if (_controller.isFetchNextData) {
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      CupertinoActivityIndicator()
+                    ],
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              })
+            ],
           ),
         );
       }
     });
-    // return SingleChildScrollView(
-    //   child: Padding(
-    //     padding: const EdgeInsets.all(8.0),
-    //     child: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         UIConst.hDivider,
-    //         Text("Food menu", style: Theme.of(context).textTheme.titleLarge,),
-    //         UIConst.hDivider,
-    //         ListView.builder(
-    //           shrinkWrap: true,
-    //           itemCount: Food.values.length,
-    //           physics: const NeverScrollableScrollPhysics(),
-    //           itemBuilder: (context, index) {
-    //             final item = Food.values.elementAt(index);
-    //             return ListTile(
-    //               leading: CircleAvatar(backgroundColor: item.colour,),
-    //               title: Text(item.name),
-    //               subtitle: Text(item.price.toStringAsFixed(2)),
-    //               trailing: Obx(() {
-    //                 final Iterable<Food> foodByName = _controller.orderedFood.where((p0) => p0.name == item.name,);
-    //                 final bool isAlreadyIn = foodByName.isNotEmpty;
-    //                 final int foodAmount = foodByName.length;
-    //                 if (isAlreadyIn) {
-    //                   return CartStepper(
-    //                     alwaysExpanded: true,
-    //                     stepper: 1,
-    //                     value: foodAmount,
-    //                     didChangeCount: (value) {
-    //                       _controller.updateItemInCart(value, item);
-    //                     },
-    //                   );
-    //                 } else {
-    //                   return FilledButton(
-    //                     onPressed: () {
-    //                       _controller.updateItemInCart(1, item);
-    //                     },
-    //                     child: Text("Add to cart"),
-    //                   );
-    //                 }
-    //               },),
-    //               onTap: null,
-    //             );
-    //           },
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }
