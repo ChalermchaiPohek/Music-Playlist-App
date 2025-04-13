@@ -4,7 +4,7 @@ Album albumFromJson(String str) => Album.fromJson(json.decode(str));
 
 class Album {
   final Headers? headers;
-  final List<Result>? results;
+  final List<AlbumData>? results;
 
   Album({
     this.headers,
@@ -13,7 +13,7 @@ class Album {
 
   factory Album.fromJson(Map<String, dynamic> json) => Album(
     headers: json["headers"] == null ? null : Headers.fromJson(json["headers"]),
-    results: json["results"] == null ? [] : List<Result>.from(json["results"]!.map((x) => Result.fromJson(x))),
+    results: json["results"] == null ? [] : List<AlbumData>.from(json["results"]!.map((x) => AlbumData.fromJson(x))),
   );
 }
 
@@ -53,7 +53,7 @@ class Headers {
   };
 }
 
-class Result {
+class AlbumData {
   final String? id;
   final String? name;
   final DateTime? releaseDate;
@@ -65,7 +65,7 @@ class Result {
   final String? shareUrl;
   final bool? zipAllowed;
 
-  Result({
+  AlbumData({
     this.id,
     this.name,
     this.releaseDate,
@@ -78,7 +78,7 @@ class Result {
     this.zipAllowed,
   });
 
-  factory Result.fromJson(Map<String, dynamic> json) => Result(
+  factory AlbumData.fromJson(Map<String, dynamic> json) => AlbumData(
     id: json["id"],
     name: json["name"],
     releaseDate: json["releasedate"] == null ? null : DateTime.parse(json["releasedate"]),

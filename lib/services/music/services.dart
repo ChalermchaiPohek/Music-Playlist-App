@@ -8,9 +8,14 @@ import 'package:music_playlist_app/util/constants.dart';
 
 class MusicService extends GetxService {
 
-  Future<Album> getAlbum() async {
+  Future<Album> getAlbum({String? offset}) async {
     try {
-      final response = await http.get(Uri.parse(AppConst.getAlbumUrl));
+      String url = AppConst.getAlbumUrl;
+      if (offset != null && offset != "") {
+        url = "$url&offset=$offset";
+      }
+
+      final response = await http.get(Uri.parse(url));
       return Album.fromJson(jsonDecode(response.body));
     } catch (error, s) {
       if (kDebugMode) {
