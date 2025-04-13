@@ -4,7 +4,7 @@ AlbumTrack albumTrackFromJson(String str) => AlbumTrack.fromJson(json.decode(str
 
 class AlbumTrack {
   final Headers? headers;
-  final List<Result>? results;
+  final List<AlbumTrackData>? results;
 
   AlbumTrack({
     this.headers,
@@ -13,7 +13,7 @@ class AlbumTrack {
 
   factory AlbumTrack.fromJson(Map<String, dynamic> json) => AlbumTrack(
     headers: json["headers"] == null ? null : Headers.fromJson(json["headers"]),
-    results: json["results"] == null ? [] : List<Result>.from(json["results"]!.map((x) => Result.fromJson(x))),
+    results: json["results"] == null ? [] : List<AlbumTrackData>.from(json["results"]!.map((x) => AlbumTrackData.fromJson(x))),
   );
 }
 
@@ -49,7 +49,7 @@ class Headers {
   };
 }
 
-class Result {
+class AlbumTrackData {
   final String? id;
   final String? name;
   final DateTime? releaseDate;
@@ -60,7 +60,7 @@ class Result {
   final bool? zipAllowed;
   final List<Track>? tracks;
 
-  Result({
+  AlbumTrackData({
     this.id,
     this.name,
     this.releaseDate,
@@ -72,7 +72,7 @@ class Result {
     this.tracks,
   });
 
-  factory Result.fromJson(Map<String, dynamic> json) => Result(
+  factory AlbumTrackData.fromJson(Map<String, dynamic> json) => AlbumTrackData(
     id: json["id"],
     name: json["name"],
     releaseDate: json["releasedate"] == null ? null : DateTime.parse(json["releasedate"]),

@@ -11,11 +11,5 @@ abstract class Routes {
       transition: Transition.native,
       binding: PlaylistScreenBinding()
     ),
-    // GetPage(
-    //   name: RoutePath.cartPath,
-    //   page: CartScreen.new,
-    //   transition: Transition.native,
-    //   binding: CartBinding()
-    // ),
   ];
 }
